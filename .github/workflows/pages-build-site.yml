@@ -47,4 +47,6 @@ jobs:
         with:
           github_token: ${{ secrets.RAN_ACTIONS_TOKEN }}
           exclude_assets: ''
-          publish_dir: /.vitepress/dist
+          publish_dir: ./.vitepress/dist
+      - name: Verify build output
+        run: ls -la .vitepress/dist  # 检查实际生成的目录
