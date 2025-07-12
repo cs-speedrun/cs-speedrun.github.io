@@ -1,0 +1,64 @@
+name: pages-build-site
+on: 
+  push:
+    branches: 
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 10
+          run_install: false
+      
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build docs
+        run: pnpm run docs:build
+
+      # 添加 .nojekyll 文件创建步骤（关键！）
+      - name: Create .nojekyll file
+        run: echo "" > .vitepress/dist/.nojekyll
+
+      # 验证步骤应该在部署之前
+      - name: Verify build output
+        run: |
+          ls -la .vitepress/dist
+          [ -f .vitepress/dist/index.html ] && echo "index.html exists" || exit 1
+
+      # 修正后的部署步骤
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.RAN_ACTIONS_TOKEN }}
+          publish_dir: .vitepress/dist
+          keep_files: false  # 清除旧文件
+          force_orphan: true  # 确保只保留最新部署
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
