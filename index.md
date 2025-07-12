@@ -8,11 +8,11 @@ hero:
   tagline: "学计算机不靠灵感，靠白天无所作为的愧疚感。"
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: 关于本站
+      link: /docs/content/index.md
     - theme: alt
-      text: API Examples
-      link: /api-examples
+      text: 目录
+      link: /docs/content/index.md
 
 features:
   - title: Feature A
